@@ -68,8 +68,6 @@ class LimitManager(object):
         }
         if None not in temporal.values():
             self.response_limits[queue_name] = temporal
-        else:
-            print queue_name, temporal
 
     def unqueue_endpoints(self, access):
         if self.next_sync < datetime.now():
