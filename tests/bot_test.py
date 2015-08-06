@@ -4,13 +4,28 @@ import json
 from datetime import datetime
 import hashlib
 import time
+import os
 
 
 class TestBot(unittest.TestCase):
 
     def setUp(self):
-        with open('config.json') as f:
-            config = json.load(f).items()[0]
+        config = {
+            "bot": {
+                "oauth": [
+                    {"app_name": "",
+                     "api_key": "",
+                     "api_secret": "",
+                     "access": "",
+                     "access_secret": "",
+                     "enabled": False
+                     }
+                ]
+            }
+        }
+        if os.path.exists('config.json'):
+            with open('config.json') as f:
+                config = json.load(f).items()[0]
         self.bot = Bot(config)
         self.text = 'Testing from github.com/limiear/populartwitterbot.'
         self.text += (" (%s)" % hashlib.md5(str(datetime.now())).
