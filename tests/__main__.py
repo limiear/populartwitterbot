@@ -1,3 +1,3 @@
 import unittest
-from access_test import *
+from bot_test import *
 unittest.main()
