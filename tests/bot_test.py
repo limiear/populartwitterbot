@@ -10,19 +10,17 @@ import os
 class TestBot(unittest.TestCase):
 
     def setUp(self):
-        config = {
-            "bot": {
-                "oauth": [
-                    {"app_name": "",
-                     "api_key": "",
-                     "api_secret": "",
-                     "access": "",
-                     "access_secret": "",
-                     "enabled": False
-                     }
-                ]
-            }
-        }
+        config = ("bot", {
+            "oauth": [
+                {"app_name": "",
+                 "api_key": "",
+                 "api_secret": "",
+                 "access": "",
+                 "access_secret": "",
+                 "enabled": False
+                 }
+            ]
+        })
         if os.path.exists('config.json'):
             with open('config.json') as f:
                 config = json.load(f).items()[0]
