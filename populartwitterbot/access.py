@@ -68,7 +68,7 @@ class Access(object):
         self.push(['post', endpoint, params, version])
 
     def fake_call(self, *args, **kwargs):
-        logger.info(args, kwargs)
+        logger.info("%s %s" % (str(args), str(kwargs)))
 
     @property
     def name(self):
