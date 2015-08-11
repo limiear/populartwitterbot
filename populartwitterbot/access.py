@@ -1,7 +1,15 @@
 from twython import Twython
 import logging
+import logging.handlers
 from queuelib import FifoDiskQueue
 import pickle
+
+
+logger = logging.getLogger('populartwitterbot')
+logger.setLevel(logging.INFO)
+handler = logging.handlers.RotatingFileHandler(
+    "populartwitterbot.out", maxBytes=20, backupCount=5)
+logger.addHandler(handler)
 
 
 class Access(object):
@@ -60,7 +68,7 @@ class Access(object):
         self.push(['post', endpoint, params, version])
 
     def fake_call(self, *args, **kwargs):
-        logging.info(args, kwargs)
+        logger.info(args, kwargs)
 
     @property
     def name(self):
