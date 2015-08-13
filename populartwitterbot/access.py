@@ -8,7 +8,7 @@ import pickle
 logger = logging.getLogger('populartwitterbot')
 logger.setLevel(logging.INFO)
 handler = logging.handlers.RotatingFileHandler(
-    "populartwitterbot.out", maxBytes=20, backupCount=5)
+    "log_populartwitterbot.out", maxBytes=20, backupCount=5)
 logger.addHandler(handler)
 
 
