@@ -1,12 +1,14 @@
 from datetime import datetime
-import threading
+from multiprocessing import Process
 import logging
 from helpers import twython
+import time
 
 
-class LimitManager(object):
+class LimitManager(Process):
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(LimitManager, self).__init__(*args, **kwargs)
         self.registered = []
         self.response_limits = {}
 
@@ -14,11 +16,6 @@ class LimitManager(object):
         if not self.registered:
             self.synchronize_limits(access)
         self.registered.append(access)
-
-    def bootup_engine(self):
-        self.engine = threading.Thread(target=self.engine_loop)
-        self.running = True
-        self.engine.start()
 
     def keys(self):
         return self.limits.keys()
@@ -34,10 +31,10 @@ class LimitManager(object):
         self.next_sync = datetime.fromtimestamp(
             self.limits.items()[0][1]['reset'])
 
-    def engine_loop(self):
-        while self.running:
-            for access in self.registered:
-                self.unqueue_endpoints(access)
+    def run(self):
+        for access in self.registered:
+            self.unqueue_endpoints(access)
+        time.sleep(0.5)
 
     def has_available_limit(self, queue_name):
         if queue_name in self.limits:
@@ -74,12 +71,10 @@ class LimitManager(object):
             self.synchronize_limits(access)
         for queue_name in access.priority_order:
             if self.has_available_limit(queue_name):
-                unziped_request = access.pop(queue_name)
-                if unziped_request:
-                    result = self.send(access, unziped_request)
-                    if not result:
-                        access.push(unziped_request)
-
-    def shutdown_engine(self):
-        self.running = False
-        self.engine.join()
+                result = True
+                with access.locks[queue_name]:
+                    unziped_request = access.pop(queue_name)
+                    if unziped_request:
+                        result = self.send(access, unziped_request)
+                if not result:
+                    access.push(unziped_request)

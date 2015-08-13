@@ -3,6 +3,7 @@ import logging
 import logging.handlers
 from queuelib import FifoDiskQueue
 import pickle
+from multiprocessing import Lock
 
 
 logger = logging.getLogger('populartwitterbot')
@@ -47,6 +48,11 @@ class Access(object):
                                        endpoint.replace('/', '+')))
         self.queues = dict(map(lambda k: (k, self.qfactory(k)),
                                self.limits.keys()))
+        self.locks = dict(map(lambda k: (k, Lock()), self.limits.keys()))
+
+    def guarantee_lock(self, queue_name):
+        if queue_name not in self.locks:
+            self.locks[queue_name] = Lock()
 
     def pop(self, queue_name):
         request = self.queues[queue_name].pop()
@@ -55,11 +61,13 @@ class Access(object):
         return request
 
     def push(self, params):
-        endpoint = params[1]
-        if endpoint not in self.queues:
-            self.queues[endpoint] = self.qfactory(endpoint)
-            self.priority_order.append(endpoint)
-        self.queues[endpoint].push(pickle.dumps(params))
+        queue_name = params[1]
+        self.guarantee_lock(queue_name)
+        with self.locks[queue_name]:
+            if queue_name not in self.queues:
+                self.queues[queue_name] = self.qfactory(queue_name)
+                self.priority_order.append(queue_name)
+            self.queues[queue_name].push(pickle.dumps(params))
 
     def get(self, endpoint, params=None, version='1.1'):
         self.push(['get', endpoint, params, version])

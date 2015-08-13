@@ -13,10 +13,10 @@ class Bot(object):
         self.access = dict(map(lambda c:
                                (c['app_name'], Access(c, self.limits)),
                                self.config['oauth']))
-        self.limits.bootup_engine()
+        self.limits.start()
 
     def shutdown(self):
-        self.limits.shutdown_engine()
+        self.limits.join()
 
     def __getattr__(self, name):
         if name in self.access:
